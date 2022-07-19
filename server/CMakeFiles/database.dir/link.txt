@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/database.dir/src/main.cpp.o CMakeFiles/database.dir/src/Timestamp.cpp.o CMakeFiles/database.dir/src/Tablefile.cpp.o  -o database 

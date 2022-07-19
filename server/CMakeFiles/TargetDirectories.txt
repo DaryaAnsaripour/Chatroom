@@ -1,0 +1,3 @@
+/home/darya/Documents/AP/Chatroom/server/CMakeFiles/rebuild_cache.dir
+/home/darya/Documents/AP/Chatroom/server/CMakeFiles/edit_cache.dir
+/home/darya/Documents/AP/Chatroom/server/CMakeFiles/server.dir

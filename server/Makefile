@@ -123,6 +123,60 @@ server/fast:
 	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/build
 .PHONY : server/fast
 
+src/Group.o: src/Group.cpp.o
+
+.PHONY : src/Group.o
+
+# target to build an object file
+src/Group.cpp.o:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Group.cpp.o
+.PHONY : src/Group.cpp.o
+
+src/Group.i: src/Group.cpp.i
+
+.PHONY : src/Group.i
+
+# target to preprocess a source file
+src/Group.cpp.i:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Group.cpp.i
+.PHONY : src/Group.cpp.i
+
+src/Group.s: src/Group.cpp.s
+
+.PHONY : src/Group.s
+
+# target to generate assembly for a file
+src/Group.cpp.s:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Group.cpp.s
+.PHONY : src/Group.cpp.s
+
+src/Server.o: src/Server.cpp.o
+
+.PHONY : src/Server.o
+
+# target to build an object file
+src/Server.cpp.o:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Server.cpp.o
+.PHONY : src/Server.cpp.o
+
+src/Server.i: src/Server.cpp.i
+
+.PHONY : src/Server.i
+
+# target to preprocess a source file
+src/Server.cpp.i:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Server.cpp.i
+.PHONY : src/Server.cpp.i
+
+src/Server.s: src/Server.cpp.s
+
+.PHONY : src/Server.s
+
+# target to generate assembly for a file
+src/Server.cpp.s:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Server.cpp.s
+.PHONY : src/Server.cpp.s
+
 src/Tablefile.o: src/Tablefile.cpp.o
 
 .PHONY : src/Tablefile.o
@@ -177,6 +231,60 @@ src/Timestamp.cpp.s:
 	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Timestamp.cpp.s
 .PHONY : src/Timestamp.cpp.s
 
+src/User.o: src/User.cpp.o
+
+.PHONY : src/User.o
+
+# target to build an object file
+src/User.cpp.o:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/User.cpp.o
+.PHONY : src/User.cpp.o
+
+src/User.i: src/User.cpp.i
+
+.PHONY : src/User.i
+
+# target to preprocess a source file
+src/User.cpp.i:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/User.cpp.i
+.PHONY : src/User.cpp.i
+
+src/User.s: src/User.cpp.s
+
+.PHONY : src/User.s
+
+# target to generate assembly for a file
+src/User.cpp.s:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/User.cpp.s
+.PHONY : src/User.cpp.s
+
+src/Userserver.o: src/Userserver.cpp.o
+
+.PHONY : src/Userserver.o
+
+# target to build an object file
+src/Userserver.cpp.o:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Userserver.cpp.o
+.PHONY : src/Userserver.cpp.o
+
+src/Userserver.i: src/Userserver.cpp.i
+
+.PHONY : src/Userserver.i
+
+# target to preprocess a source file
+src/Userserver.cpp.i:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Userserver.cpp.i
+.PHONY : src/Userserver.cpp.i
+
+src/Userserver.s: src/Userserver.cpp.s
+
+.PHONY : src/Userserver.s
+
+# target to generate assembly for a file
+src/Userserver.cpp.s:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/src/Userserver.cpp.s
+.PHONY : src/Userserver.cpp.s
+
 src/main.o: src/main.cpp.o
 
 .PHONY : src/main.o
@@ -213,12 +321,24 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... server"
+	@echo "... src/Group.o"
+	@echo "... src/Group.i"
+	@echo "... src/Group.s"
+	@echo "... src/Server.o"
+	@echo "... src/Server.i"
+	@echo "... src/Server.s"
 	@echo "... src/Tablefile.o"
 	@echo "... src/Tablefile.i"
 	@echo "... src/Tablefile.s"
 	@echo "... src/Timestamp.o"
 	@echo "... src/Timestamp.i"
 	@echo "... src/Timestamp.s"
+	@echo "... src/User.o"
+	@echo "... src/User.i"
+	@echo "... src/User.s"
+	@echo "... src/Userserver.o"
+	@echo "... src/Userserver.i"
+	@echo "... src/Userserver.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

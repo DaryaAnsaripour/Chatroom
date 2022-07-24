@@ -1,1 +1,1 @@
-/usr/bin/c++    -rdynamic CMakeFiles/server.dir/src/main.cpp.o CMakeFiles/server.dir/src/Timestamp.cpp.o CMakeFiles/server.dir/src/Tablefile.cpp.o  -o server 
+/usr/bin/c++    -rdynamic CMakeFiles/server.dir/src/main.cpp.o CMakeFiles/server.dir/src/Timestamp.cpp.o CMakeFiles/server.dir/src/Tablefile.cpp.o CMakeFiles/server.dir/src/Userserver.cpp.o CMakeFiles/server.dir/src/User.cpp.o CMakeFiles/server.dir/src/Group.cpp.o CMakeFiles/server.dir/src/Server.cpp.o  -o server  -lpthread 

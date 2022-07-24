@@ -5,12 +5,12 @@
 
 class timestamp
 {
-protected:
-    static const regex timePattern;
+public:
+    static const regex timepattern;
     int hour;
     int minute;
     int second;
-public:
+
     timestamp(string time);
     bool operator>(const timestamp &right) const;
     bool operator<(const timestamp &right) const;

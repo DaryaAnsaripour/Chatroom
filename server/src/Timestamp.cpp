@@ -1,12 +1,12 @@
 #include "../headers/Timestamp.hpp"
 
 
-const regex timestamp::timePattern=regex("([0-9][0-9]):([0-9][0-9]):([0-9][0-9])");
+const regex timestamp::timepattern=regex("([0-9][0-9]):([0-9][0-9]):([0-9][0-9])");
 
 timestamp::timestamp(string time)
 {
     smatch matches;
-    if(regex_search(time, matches, timePattern))
+    if(regex_search(time, matches, timepattern))
     {
         hour=stoi(matches[1]);
         minute=stoi(matches[2]);

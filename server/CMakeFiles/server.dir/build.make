@@ -96,11 +96,67 @@ CMakeFiles/server.dir/src/Tablefile.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/Tablefile.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/darya/Documents/AP/Chatroom/server/src/Tablefile.cpp -o CMakeFiles/server.dir/src/Tablefile.cpp.s
 
+CMakeFiles/server.dir/src/Userserver.cpp.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/Userserver.cpp.o: src/Userserver.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/darya/Documents/AP/Chatroom/server/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/server.dir/src/Userserver.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/server.dir/src/Userserver.cpp.o -c /home/darya/Documents/AP/Chatroom/server/src/Userserver.cpp
+
+CMakeFiles/server.dir/src/Userserver.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/server.dir/src/Userserver.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/darya/Documents/AP/Chatroom/server/src/Userserver.cpp > CMakeFiles/server.dir/src/Userserver.cpp.i
+
+CMakeFiles/server.dir/src/Userserver.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/Userserver.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/darya/Documents/AP/Chatroom/server/src/Userserver.cpp -o CMakeFiles/server.dir/src/Userserver.cpp.s
+
+CMakeFiles/server.dir/src/User.cpp.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/User.cpp.o: src/User.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/darya/Documents/AP/Chatroom/server/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/server.dir/src/User.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/server.dir/src/User.cpp.o -c /home/darya/Documents/AP/Chatroom/server/src/User.cpp
+
+CMakeFiles/server.dir/src/User.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/server.dir/src/User.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/darya/Documents/AP/Chatroom/server/src/User.cpp > CMakeFiles/server.dir/src/User.cpp.i
+
+CMakeFiles/server.dir/src/User.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/User.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/darya/Documents/AP/Chatroom/server/src/User.cpp -o CMakeFiles/server.dir/src/User.cpp.s
+
+CMakeFiles/server.dir/src/Group.cpp.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/Group.cpp.o: src/Group.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/darya/Documents/AP/Chatroom/server/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/server.dir/src/Group.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/server.dir/src/Group.cpp.o -c /home/darya/Documents/AP/Chatroom/server/src/Group.cpp
+
+CMakeFiles/server.dir/src/Group.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/server.dir/src/Group.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/darya/Documents/AP/Chatroom/server/src/Group.cpp > CMakeFiles/server.dir/src/Group.cpp.i
+
+CMakeFiles/server.dir/src/Group.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/Group.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/darya/Documents/AP/Chatroom/server/src/Group.cpp -o CMakeFiles/server.dir/src/Group.cpp.s
+
+CMakeFiles/server.dir/src/Server.cpp.o: CMakeFiles/server.dir/flags.make
+CMakeFiles/server.dir/src/Server.cpp.o: src/Server.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/darya/Documents/AP/Chatroom/server/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/server.dir/src/Server.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/server.dir/src/Server.cpp.o -c /home/darya/Documents/AP/Chatroom/server/src/Server.cpp
+
+CMakeFiles/server.dir/src/Server.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/server.dir/src/Server.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/darya/Documents/AP/Chatroom/server/src/Server.cpp > CMakeFiles/server.dir/src/Server.cpp.i
+
+CMakeFiles/server.dir/src/Server.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/server.dir/src/Server.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/darya/Documents/AP/Chatroom/server/src/Server.cpp -o CMakeFiles/server.dir/src/Server.cpp.s
+
 # Object files for target server
 server_OBJECTS = \
 "CMakeFiles/server.dir/src/main.cpp.o" \
 "CMakeFiles/server.dir/src/Timestamp.cpp.o" \
-"CMakeFiles/server.dir/src/Tablefile.cpp.o"
+"CMakeFiles/server.dir/src/Tablefile.cpp.o" \
+"CMakeFiles/server.dir/src/Userserver.cpp.o" \
+"CMakeFiles/server.dir/src/User.cpp.o" \
+"CMakeFiles/server.dir/src/Group.cpp.o" \
+"CMakeFiles/server.dir/src/Server.cpp.o"
 
 # External object files for target server
 server_EXTERNAL_OBJECTS =
@@ -108,9 +164,13 @@ server_EXTERNAL_OBJECTS =
 server: CMakeFiles/server.dir/src/main.cpp.o
 server: CMakeFiles/server.dir/src/Timestamp.cpp.o
 server: CMakeFiles/server.dir/src/Tablefile.cpp.o
+server: CMakeFiles/server.dir/src/Userserver.cpp.o
+server: CMakeFiles/server.dir/src/User.cpp.o
+server: CMakeFiles/server.dir/src/Group.cpp.o
+server: CMakeFiles/server.dir/src/Server.cpp.o
 server: CMakeFiles/server.dir/build.make
 server: CMakeFiles/server.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/darya/Documents/AP/Chatroom/server/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable server"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/darya/Documents/AP/Chatroom/server/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable server"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/server.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

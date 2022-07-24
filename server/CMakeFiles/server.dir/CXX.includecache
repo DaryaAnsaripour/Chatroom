@@ -13,6 +13,8 @@ vector
 -
 map
 -
+algorithm
+-
 fstream
 -
 regex
@@ -25,6 +27,20 @@ sys/socket.h
 -
 netinet/in.h
 -
+thread
+-
+unistd.h
+-
+
+/home/darya/Documents/AP/Chatroom/server/headers/Group.hpp
+../headers/User.hpp
+/home/darya/Documents/AP/Chatroom/server/headers/User.hpp
+
+/home/darya/Documents/AP/Chatroom/server/headers/Server.hpp
+../headers/Tablefile.hpp
+/home/darya/Documents/AP/Chatroom/server/headers/Tablefile.hpp
+../headers/Group.hpp
+/home/darya/Documents/AP/Chatroom/server/headers/Group.hpp
 
 /home/darya/Documents/AP/Chatroom/server/headers/Tablefile.hpp
 ../headers/Timestamp.hpp
@@ -34,11 +50,19 @@ netinet/in.h
 Console.hpp
 /home/darya/Documents/AP/Chatroom/server/headers/Console.hpp
 
-/home/darya/Documents/AP/Chatroom/server/src/Tablefile.cpp
-../headers/Tablefile.hpp
-/home/darya/Documents/AP/Chatroom/server/headers/Tablefile.hpp
+/home/darya/Documents/AP/Chatroom/server/headers/User.hpp
+../headers/Userserver.hpp
+/home/darya/Documents/AP/Chatroom/server/headers/Userserver.hpp
+
+/home/darya/Documents/AP/Chatroom/server/headers/Userserver.hpp
+../headers/Console.hpp
+/home/darya/Documents/AP/Chatroom/server/headers/Console.hpp
+
+/home/darya/Documents/AP/Chatroom/server/src/Server.cpp
+../headers/Server.hpp
+/home/darya/Documents/AP/Chatroom/server/headers/Server.hpp
 
 /home/darya/Documents/AP/Chatroom/server/src/main.cpp
-../headers/Tablefile.hpp
-/home/darya/Documents/AP/Chatroom/server/headers/Tablefile.hpp
+../headers/Server.hpp
+/home/darya/Documents/AP/Chatroom/server/headers/Server.hpp
 

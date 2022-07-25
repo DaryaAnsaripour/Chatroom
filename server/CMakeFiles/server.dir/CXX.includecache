@@ -31,6 +31,8 @@ thread
 -
 unistd.h
 -
+signal.h
+-
 
 /home/darya/Documents/AP/Chatroom/server/headers/Group.hpp
 ../headers/User.hpp
@@ -59,10 +61,6 @@ Console.hpp
 /home/darya/Documents/AP/Chatroom/server/headers/Console.hpp
 
 /home/darya/Documents/AP/Chatroom/server/src/Server.cpp
-../headers/Server.hpp
-/home/darya/Documents/AP/Chatroom/server/headers/Server.hpp
-
-/home/darya/Documents/AP/Chatroom/server/src/main.cpp
 ../headers/Server.hpp
 /home/darya/Documents/AP/Chatroom/server/headers/Server.hpp
 

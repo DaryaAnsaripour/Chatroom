@@ -1,7 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "Console.hpp"
+#include "../headers/Console.hpp"
 
 class Client
 {
@@ -23,9 +23,12 @@ public:
     void start_connecting();
     void start_communicating();
     void login();
-    void send_handler(Client* client);
+    static void send_handler(Client* client);
+    static void recv_handler(Client* client);
 
     void multi_print(string message, bool you=true);
+
+    void close_connection();
     ~Client();
 };
 

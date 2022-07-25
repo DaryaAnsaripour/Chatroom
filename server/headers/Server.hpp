@@ -40,6 +40,9 @@ public:
     void send_friends(User* user);
     void create_group(User* user, string groupname);
     void invite_group(User* inviter, string new_member ,string groupname);
+    void block_user(User* blocker, string blocked);
+    void unblock_user(User* unblocker, string unblocked);
+
 
 
 
@@ -53,6 +56,8 @@ public:
 
 
     void end_connection(int id);
+    void delete_users();
+    void close_connection();
     ~Server();
 };
 

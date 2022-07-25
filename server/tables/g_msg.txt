@@ -1,0 +1,1 @@
+id:int group:string user:string time:timestamp msg:string 

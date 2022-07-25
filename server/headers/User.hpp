@@ -10,6 +10,7 @@ public:
     string username;
     string password;
     string name;
+    map<string, User*> blocks;
 
     User(string username, string password, string name, Userserver* user_server=0);
 };

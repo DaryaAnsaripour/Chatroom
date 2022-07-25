@@ -24,7 +24,7 @@ Tablefile::Tablefile(string cmnd)
                 file<<temp[i-1]<<":"<<temp[i]<<" ";
             }
         }
-        file<<"\n";
+        // file<<"\n";
         file.close();
     }
 }
@@ -40,9 +40,9 @@ void Tablefile::insert_record(string cmnd)
         string vals=matches[2];
         file.open(addr, ios::app);
         // file.seekp(0,ios::end);
+        file<<"\n";
         vector<string> temp=mysplit(vals, 0);
-
-        for(int i=0; i<argnames.size(); i++)
+        for(int i=0; i<argnames.size()-1; i++)
         {
             if(args[argnames[i]]=="string")
                 file<<temp[i].substr(1,temp[i].length()-2)<<",";
@@ -51,7 +51,12 @@ void Tablefile::insert_record(string cmnd)
             else
                 file<<temp[i]<<",";
         }
-        file<<"\n";
+        if(args[argnames[argnames.size()-1]]=="string")
+                file<<temp[argnames.size()-1].substr(1,temp[argnames.size()-1].length()-2);
+            else if(args[argnames[argnames.size()-1]]=="timestamp")
+                file<<temp[argnames.size()-1].substr(1,temp[argnames.size()-1].length()-2);
+            else
+                file<<temp[argnames.size()-1];
         file.close();
     }
 }
@@ -72,7 +77,7 @@ void Tablefile::delete_record(string cmnd)
 
         // to get titles
         getline(file, line);
-        tempfile<<line<<endl;
+        tempfile<<line;
 
         // to get valid records
         while(getline(file, line))
@@ -82,7 +87,7 @@ void Tablefile::delete_record(string cmnd)
                 line.replace(line.find(line), line.length(), "");
             }
             if(line!="")
-                tempfile<<line<<endl;
+                tempfile<<'\n'<<line;
         }
 
         // to remove firstfile and rename tmpfile
@@ -114,7 +119,7 @@ void Tablefile::update_record(string cmnd)
 
         // to get titles
         getline(file, line);
-        tempfile<<line<<endl;
+        tempfile<<line;
 
         // to get valid records
         while(getline(file, line))
@@ -146,7 +151,7 @@ void Tablefile::update_record(string cmnd)
                 } 
                 newline=myjoin(temp);
             }
-            tempfile<<newline<<endl;
+            tempfile<<'\n'<<newline;
         } 
 
         // to remove firstfile and rename tmpfile
@@ -161,13 +166,13 @@ void Tablefile::update_record(string cmnd)
 
 vector<string>* Tablefile::select_records(string cmnd)
 {
+    
     lock_guard<mutex> guard(mtx);
-    regex selectpat1("^SELECT (.+) FROM ([a-zA-Z0-9_]+) WHERE (.+)$");
-    regex selectpat2("^SELECT (.+) FROM ([a-zA-Z0-9_]+)$");
+    regex selectpat1("^SELECT ([^\\s]+) FROM ([a-zA-Z0-9_]+) WHERE (.+)$");
+    regex selectpat2("^SELECT ([^\\s]+) FROM ([a-zA-Z0-9_]+)$");
     smatch matches;
-    vector<string>* validrecords;
+    vector<string>* validrecords=new vector<string>();
     file.open(addr, ios::in);
-
     if(regex_search(cmnd, matches, selectpat1))
     {
         string condition=matches[3];
@@ -192,16 +197,20 @@ vector<string>* Tablefile::select_records(string cmnd)
         }
         else
         {
-            vector<string> selectedtitles=mysplit(titles.substr(1, titles.length()-2), 0);
+            vector<string> selectedtitles=mysplit(titles, 0);
+
             vector<int> indexes;
             for(string title: selectedtitles)
+            {
                 for(int i=0; i<argnames.size(); i++)
+                {
                     if(argnames[i]==title)
                     {
                         indexes.push_back(i);
                         break;
                     }
-
+                }
+            }
             getline(file, line);
 
             while(getline(file, line))
@@ -247,7 +256,7 @@ vector<string>* Tablefile::select_records(string cmnd)
         }
         else
         {
-            vector<string> selectedtitles=mysplit(titles.substr(1, titles.length()-2), 0);
+            vector<string> selectedtitles=mysplit(titles, 0);
             vector<int> indexes;
             for(string title: selectedtitles)
                 for(int i=0; i<argnames.size(); i++)
@@ -428,5 +437,5 @@ string myjoin(vector<string> v)
         s+=v[i];
         s+=",";
     }
-    return s;
+    return s.substr(0, s.length()-1);
 }

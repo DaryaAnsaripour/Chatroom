@@ -3,10 +3,11 @@
 Server::Server()
 {
     unique_id = 0;
-    MAX_LEN = 150;
+    MAX_LEN = 520;
     clients.clear();
 
     do_command("CREATE TABLE users (username string,password string,name string)");
+    do_command("CREATE TABLE blocks (blocker string,blocked string)");
     do_command("CREATE TABLE groups (name string,description string,usersNum int)");
     do_command("CREATE TABLE user_group (username string,group string)");
     do_command("CREATE TABLE pv_msg (id int,user1 string,user2 string,time timestamp,msg string)");
@@ -25,7 +26,7 @@ void Server::start_listening()
 
     struct sockaddr_in server;
     server.sin_family = AF_INET;
-	server.sin_port = htons(10000);
+	server.sin_port = htons(10001);
 	server.sin_addr.s_addr = INADDR_ANY;
     if ((bind(server_socket, (struct sockaddr *)&server, sizeof(struct sockaddr_in))) == -1)
 	{
@@ -91,7 +92,7 @@ bool Server::login_client(Userserver* user_server)
 {
     while(true)
     {
-        char command[1];
+        char command[MAX_LEN];
         int bytes_received = recv(user_server->client_socket, command, sizeof(command), 0);
         if(bytes_received <= 0)
             return false;
@@ -141,15 +142,19 @@ bool Server::login_client(Userserver* user_server)
             int bytes_received = recv(user_server->client_socket, username, sizeof(username), 0);
             if(bytes_received <= 0)
                 return false;
+            cout<<username<<endl;
             bytes_received = recv(user_server->client_socket, name, sizeof(name), 0);
             if(bytes_received <= 0)
                 return false;
+            cout<<name<<endl;
             bytes_received = recv(user_server->client_socket, password1, sizeof(password1), 0);
             if(bytes_received <= 0)
                 return false;
+            cout<<password1<<endl;
             bytes_received = recv(user_server->client_socket, password2, sizeof(password2), 0);
             if(bytes_received <= 0)
                 return false;
+            cout<<password2<<endl;
 
             int request_case = try_add_user(user_server, username, password1, password2, name);
     
@@ -218,11 +223,13 @@ int Server::try_add_user(Userserver* user_server, string username, string passwo
 
 void Server::do_for_user(User* user, string message)
 {
-    regex changenamepat("change my name to (.+)");
-    regex creategppat("create group (.+)");
-    regex invitepat("invite (.+) to (.+)");
-    regex pvpat("#pv #([^\\s]+) ([^#]+)");
-    regex gppat("#gp #([^\\s]+) ([^#]+)");
+    regex changenamepat("change my name to ([^\\s]+)");
+    regex creategppat("create group ([^\\s]+)");
+    regex invitepat("invite ([^\\s]+) to ([^\\s]+)");
+    regex blockuserpat("^block ([^\\s]+)");
+    regex unblockuserpat("^unblock ([^\\s]+)");
+    regex pvpat("#pv #([^\\s]+) ([^#\\s]+)");
+    regex gppat("#gp #([^\\s]+) ([^#\\s]+)");
     smatch matches;
     try
     {
@@ -258,6 +265,16 @@ void Server::do_for_user(User* user, string message)
             string groupname=matches[2];
             invite_group(user, new_member, groupname);
         }
+        else if(regex_search(message, matches, blockuserpat))
+        {
+            string blocked=matches[1];
+            block_user(user, blocked);
+        }
+        else if(regex_search(message, matches, unblockuserpat))
+        {
+            string unblocked=matches[1];
+            unblock_user(user, unblocked);
+        }
         else if(regex_search(message, matches, pvpat))
         {
 
@@ -266,11 +283,13 @@ void Server::do_for_user(User* user, string message)
         {
             
         }
+        else
+            throw "The command is not executable";
 
     }
     catch(const char* msg)
     {
-        
+        send_message(user->user_server->client_socket, "Server | There is a problem ( " + string(msg) + " )");
     }
     
 }
@@ -290,7 +309,8 @@ void Server::send_groups(User* user)
     string message="Server | Groups:";
     int i=1;
 
-    vector<string>* gps=do_command("SELECT group FROM user_group WHERE username==\"" + user->username + "\"");
+    vector<string>* gps=new vector<string>();
+    gps=do_command("SELECT group FROM user_group WHERE username==\"" + user->username + "\"");
     
     for(string &group: *gps)
         message+="\n" + to_string(i++) + ": " + group;
@@ -306,11 +326,13 @@ void Server::send_friends(User* user)
     string message="Server | Friends:";
     int i=1;
 
-    vector<string>* friends1=do_command("SELECT user2 FROM pv_msg WHERE user1==\"" + user->username + "\"");
+    vector<string>* friends1=new vector<string>();
+    friends1=do_command("SELECT user2 FROM pv_msg WHERE user1==\"" + user->username + "\"");
     sort(friends1->begin(), friends1->end());
     friends1->erase(unique(friends1->begin(), friends1->end()), friends1->end());
 
-    vector<string>* friends2=do_command("SELECT user1 FROM pv_msg WHERE user2==\"" + user->username + "\"");
+    vector<string>* friends2=new vector<string>();
+    friends2=do_command("SELECT user1 FROM pv_msg WHERE user2==\"" + user->username + "\"");
     sort(friends2->begin(), friends2->end());
     friends2->erase(unique(friends2->begin(), friends2->end()), friends2->end());
 
@@ -342,7 +364,9 @@ void Server::create_group(User* user, string groupname)
     Group* new_group=new Group(groupname, description);
     new_group->admin=user;
     new_group->add_member(user);
+    groups[new_group->name]=new_group;
     do_command("INSERT INTO groups VALUES (\"" + groupname + "\",\"" + description + "\"," + "1)");
+    do_command("INSERT INTO user_group VALUES (\"" + user->username + "\",\"" + groupname + "\"," + "1)");
     send_message(user->user_server->client_socket, "Server | Group created succesfully!");
 
 }
@@ -357,29 +381,50 @@ void Server::invite_group(User* inviter, string new_member ,string groupname)
     do_command("INSERT INTO user_group VALUES (\"" + new_member + "\",\"" + groupname + "\")");
     do_command("UPDATE groups SET usersNum=" + to_string(groups[groupname]->users_num) + " WHERE name==\"" + groupname +"\"");
 
-    send_message(inviter->user_server->client_socket, "Server | You invited" + users[new_member]->name);
-    broadcast_message("Server | " + inviter->name + " invited" + users[new_member]->name, inviter->username, groups[groupname]->users);
+    send_message(inviter->user_server->client_socket, "Server | You invited " + users[new_member]->name);
+    broadcast_message("Server | " + inviter->name + " invited " + users[new_member]->name, inviter->username, groups[groupname]->users);
 }
 
+void Server::block_user(User* blocker, string blocked)
+{
+    check_user(blocked);
+    if(blocker->blocks.find(blocked) !=  blocker->blocks.end())
+        throw "You have already blocked this user.";
+    blocker->blocks[blocked]=users[blocked];
+    do_command("INSERT INTO blocks VALUES (\"" + blocker->username + "\",\"" + blocked + "\")" );
 
+    send_message(blocker->user_server->client_socket, "Server | You blocked " + users[blocked]->name);
+}
+
+void Server::unblock_user(User* unblocker, string unblocked)
+{
+    check_user(unblocked);
+    if(unblocker->blocks.find(unblocked) ==  unblocker->blocks.end())
+        throw "This user isn't blocked.";
+    unblocker->blocks[unblocked]=users[unblocked];
+    do_command("DELETE FROM blocks WHERE blocker==\"" + unblocker->username + "\" & blocked==\"" + unblocked + "\")" );
+
+    send_message(unblocker->user_server->client_socket, "Server | You unblocked " + users[unblocked]->name);
+}
 
 
 
 
 vector<string>* Server::do_command(string cmnd)
 {
-    vector<string>* recs;
-    regex createpat("^CREATE TABLE ([a-zA-Z0-9_]+) \\((.+)\\)$");\
-    regex insertpat("^INSERT INTO ([a-zA-Z0-9_]+) VALUES \\((.+)\\)$");
-    regex deletepat("^DELETE FROM ([a-zA-Z0-9_]+) WHERE (.+)$");
-    regex updatepat("^UPDATE ([a-zA-Z0-9_]+) SET (.+) WHERE (.+)$");
-    regex selectpat("^SELECT (.+) FROM ([a-zA-Z0-9_]+) WHERE (.+)$");
+    vector<string>* recs=new vector<string>();
+    regex createpat("CREATE TABLE ([a-zA-Z0-9_]+) \\((.+)\\)");\
+    regex insertpat("INSERT INTO ([a-zA-Z0-9_]+) VALUES \\((.+)\\)");
+    regex deletepat("DELETE FROM ([a-zA-Z0-9_]+) WHERE (.+)");
+    regex updatepat("UPDATE ([a-zA-Z0-9_]+) SET (.+) WHERE (.+)");
+    regex selectpat("SELECT (.+) FROM ([a-zA-Z0-9_]+)");
     smatch matches;
 
     if(regex_search(cmnd, matches, createpat))
     {
-        string tablename=matches[1];
-        database[tablename]=new Tablefile(cmnd);
+        // string tablename=matches[1];
+        Tablefile* tf=new Tablefile(cmnd);
+        database[tf->name]=tf;
     }
     else if(regex_search(cmnd, matches, insertpat))
     {
@@ -396,17 +441,22 @@ vector<string>* Server::do_command(string cmnd)
         string tablename=matches[1];
         database[tablename]->update_record(cmnd);
     }
-    else
+    else if(regex_search(cmnd, matches, selectpat))
     {
         string tablename=matches[2];
         recs=database[tablename]->select_records(cmnd);
+    }
+    else
+    {
+        cout<<"no match";
     }
     return recs;
 }
 
 void Server::get_users_from_db()
 {
-    vector<string>* records=do_command("SELECT * FROM users");
+    vector<string>* records=new vector<string>();
+    records=do_command("SELECT * FROM users");
     for(string &record: *records)
     {
         vector<string> user=mysplit(record, 0);
@@ -456,13 +506,30 @@ void Server::check_group(string groupname)
 
 
 
-
-
 void Server::end_connection(int id)
 {
     lock_guard<mutex> guard(clients_mtx);
     if (clients[id])
         delete clients[id];
+}
+
+void Server::delete_users()
+{
+    for (auto & u : clients)
+    {
+        delete u.second;
+    }
+    clients.clear();
+    for (auto & u : users)
+    {
+        delete u.second;
+    }
+    users.clear();
+}
+
+void Server::close_connection()
+{
+    close(server_socket);
 }
 
 Server::~Server()
@@ -473,4 +540,6 @@ Server::~Server()
     delete database["pv_msg"];
     delete database["g_msg"];
     delete database["buffer"];
+    delete_users();
+    close_connection();
 }

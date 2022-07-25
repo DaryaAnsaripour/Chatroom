@@ -1,0 +1,3 @@
+username:string group:string 
+daryaa,us
+soghra,us

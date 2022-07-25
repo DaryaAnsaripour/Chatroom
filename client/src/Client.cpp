@@ -3,7 +3,7 @@
 
 Client::Client()
 {
-    MAX_LEN = 150;
+    MAX_LEN = 520;
 	logged_in = false;
 	exited = false;
     username = new char[MAX_LEN];
@@ -22,7 +22,7 @@ void Client::start_connecting()
 
     struct sockaddr_in client;
 	client.sin_family=AF_INET;
-	client.sin_port=htons(10000);
+	client.sin_port=htons(10001);
 	client.sin_addr.s_addr=INADDR_ANY;
     if ((connect(client_socket, (struct sockaddr *)&client, sizeof(struct sockaddr_in))) == -1)
 	{
@@ -34,12 +34,12 @@ void Client::start_connecting()
 void Client::start_communicating()
 {
 	login();
-    // send_thread = new thread(send_handler, this);
-    // recv_thread = new thread(recv_handler, this);	
-	// if (send_thread->joinable())
-	// 	send_thread->join();
-	// if (recv_thread->joinable())
-	// 	recv_thread->join();
+    send_thread = new thread(send_handler, this);
+    recv_thread = new thread(recv_handler, this);	
+	if (send_thread->joinable())
+		send_thread->join();
+	if (recv_thread->joinable())
+		recv_thread->join();
 	
 }
 
@@ -47,14 +47,13 @@ void Client::login()
 {
 	while(true)
 	{
-		cout<<"Enter l to login or s to sign up!";
-		char* command = new char[1];
-		cin>>command;	
+		cout<<"Enter l to login or s to sign up!\n";
+		char* command = new char[MAX_LEN];
+		cin.getline(command, MAX_LEN);
+		send(client_socket, command, sizeof(command), 0);
 
 		if(command[0]=='l')
 		{
-			send(client_socket, command, sizeof(command), 0);
-
 			cout<<"Enter your username : ";
 			cin.getline(username, MAX_LEN);
 			send(client_socket, username, sizeof(username), 0);
@@ -77,21 +76,19 @@ void Client::login()
 		}
 		else if(command[0]=='s')
 		{
-			send(client_socket, command, sizeof(command), 0);
-
-			cout<<"Choose a username : ";
+			cout<<"Choose a username : \n";
 			cin.getline(username, MAX_LEN);
 			send(client_socket, username, sizeof(username), 0);
 
-			cout<<"Choose a name : ";
+			cout<<"Choose a name : \n";
 			cin.getline(name, MAX_LEN);
 			send(client_socket, name, sizeof(name), 0);
 
-			cout<<"Choose a password : ";
+			cout<<"Choose a password : \n";
 			cin.getline(password, MAX_LEN);
 			send(client_socket, password, sizeof(password), 0);
 
-			cout<<"Confirm password : ";
+			cout<<"Confirm password : \n";
 			cin.getline(password, MAX_LEN);
 			send(client_socket, password, sizeof(password), 0);
 
@@ -106,8 +103,6 @@ void Client::login()
 				multi_print(menu);
 				break;
 			}
-
-
 		}
 	}
 }
@@ -132,9 +127,18 @@ void Client::send_handler(Client* client)
 	}
 }
 
-
-
-
+void Client::recv_handler(Client* client)
+{
+	while(!client->exited)
+	{
+		char message[client->MAX_LEN];
+		int bytes_received = recv(client->client_socket, message, sizeof(message), 0);
+		if(bytes_received <= 0)
+			continue;
+		client->multi_print(message);
+		fflush(stdout);
+	}
+}
 
 
 void Client::multi_print(string message, bool you)
@@ -146,6 +150,33 @@ void Client::multi_print(string message, bool you)
 		cout<<"\33[2K \r"<<"You : ";
 }
 
+void Client::close_connection()
+{
+	if (send_thread)
+	{
+		if (send_thread->joinable())
+		{
+			send_thread->detach();
+			delete send_thread;
+		}
+		send_thread = 0;
+	}
+	if (recv_thread)
+	{
+		if (recv_thread->joinable())
+		{
+			recv_thread->detach();
+			delete recv_thread;
+		}
+		recv_thread = 0;
+	}
+    close(client_socket);
+	multi_print("=== The socket turned off ===", false);
+}
+
 Client::~Client()
 {
+	close_connection();
+	delete [] name;
+	delete [] password;
 }

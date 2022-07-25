@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/darya/Documents/AP/Chatroom/client/headers/Client.hpp
+../headers/Console.hpp
+/home/darya/Documents/AP/Chatroom/client/headers/Console.hpp
+
+/home/darya/Documents/AP/Chatroom/client/headers/Console.hpp
+iostream
+-
+mutex
+-
+sys/types.h
+-
+sys/socket.h
+-
+netinet/in.h
+-
+thread
+-
+unistd.h
+-
+signal.h
+-
+
+/home/darya/Documents/AP/Chatroom/client/src/Client.cpp
+../headers/Client.hpp
+/home/darya/Documents/AP/Chatroom/client/headers/Client.hpp
+

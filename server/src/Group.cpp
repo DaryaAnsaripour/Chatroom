@@ -21,3 +21,11 @@ void Group::add_member(User* user)
     }
     throw "This user is already a member of group.";
 }
+
+bool Group::is_member(User* user)
+{
+    if(users.find(user->username)!=users.end())
+        return true;
+    return false;
+}
+

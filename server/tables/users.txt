@@ -1,2 +1,3 @@
 username:string password:string name:string 
-daryaa,1382,darya
+daryaapr,1382,darya
+radi,12,rad

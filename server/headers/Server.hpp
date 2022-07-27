@@ -10,6 +10,8 @@ public:
     int unique_id;
     int MAX_LEN;
     int server_socket;
+    int pv_id;
+    int gp_id;
     mutex print_mtx, clients_mtx;
     map<string, Tablefile*> database;
     map<string, User*> users;
@@ -38,10 +40,15 @@ public:
     void change_name(User* user, string new_name);
     void send_groups(User* user);
     void send_friends(User* user);
+    void send_blocked(User* user);
     void create_group(User* user, string groupname);
     void invite_group(User* inviter, string new_member ,string groupname);
     void block_user(User* blocker, string blocked);
     void unblock_user(User* unblocker, string unblocked);
+    void send_pv(User* sender, User* receiver, string message);
+    void send_gp(User* sender, string groupname, string message);
+    void send_buffer(User* user);
+
 
 
 
@@ -53,7 +60,8 @@ public:
     void broadcast_message(string message, string sender_username, map<string, User*> dest_users);
     void check_user(string username, bool connected=true);
     void check_group(string groupname);
-
+    void check_blocked(User* sender, User* receiver);
+    string curr_time();
 
     void end_connection(int id);
     void delete_users();

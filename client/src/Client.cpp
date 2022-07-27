@@ -3,7 +3,7 @@
 
 Client::Client()
 {
-    MAX_LEN = 520;
+    MAX_LEN = 200;
 	logged_in = false;
 	exited = false;
     username = new char[MAX_LEN];
@@ -22,7 +22,7 @@ void Client::start_connecting()
 
     struct sockaddr_in client;
 	client.sin_family=AF_INET;
-	client.sin_port=htons(10001);
+	client.sin_port=htons(10000);
 	client.sin_addr.s_addr=INADDR_ANY;
     if ((connect(client_socket, (struct sockaddr *)&client, sizeof(struct sockaddr_in))) == -1)
 	{
@@ -50,59 +50,53 @@ void Client::login()
 		cout<<"Enter l to login or s to sign up!\n";
 		char* command = new char[MAX_LEN];
 		cin.getline(command, MAX_LEN);
-		send(client_socket, command, sizeof(command), 0);
+		send(client_socket, command, MAX_LEN, 0);
 
 		if(command[0]=='l')
 		{
-			cout<<"Enter your username : ";
+			cout<<"Enter your username : \n";
 			cin.getline(username, MAX_LEN);
-			send(client_socket, username, sizeof(username), 0);
+			send(client_socket, username, MAX_LEN, 0);
 
-			cout<<"Enter your password : ";
+			cout<<"Enter your password : \n";
 			cin.getline(password, MAX_LEN);
-			send(client_socket, password, sizeof(password), 0);
+			send(client_socket, password, MAX_LEN, 0);
 
 			multi_print("Your login request has been sent!", false);
 			char answer[MAX_LEN];
-			int bytes_received = recv(client_socket, answer, sizeof(answer), 0);
+			int bytes_received = recv(client_socket, answer, MAX_LEN, 0);
 			if(bytes_received <= 0)
 				continue;
 			multi_print(answer, false);
 			if (string(answer) == "Server | welcome " + string(username))
-			{
-				multi_print(menu);
 				break;
-			}
 		}
 		else if(command[0]=='s')
 		{
 			cout<<"Choose a username : \n";
 			cin.getline(username, MAX_LEN);
-			send(client_socket, username, sizeof(username), 0);
+			send(client_socket, username, MAX_LEN, 0);
 
 			cout<<"Choose a name : \n";
 			cin.getline(name, MAX_LEN);
-			send(client_socket, name, sizeof(name), 0);
+			send(client_socket, name, MAX_LEN, 0);
 
 			cout<<"Choose a password : \n";
 			cin.getline(password, MAX_LEN);
-			send(client_socket, password, sizeof(password), 0);
+			send(client_socket, password, MAX_LEN, 0);
 
 			cout<<"Confirm password : \n";
 			cin.getline(password, MAX_LEN);
-			send(client_socket, password, sizeof(password), 0);
+			send(client_socket, password, MAX_LEN, 0);
 
 			multi_print("Your sign up request has been sent!", false);
 			char answer[MAX_LEN];
-			int bytes_received = recv(client_socket, answer, sizeof(answer), 0);
+			int bytes_received = recv(client_socket, answer, MAX_LEN, 0);
 			if(bytes_received <= 0)
 				continue;
 			multi_print(answer, false);
 			if (string(answer) == "Server | welcome " + string(username))
-			{
-				multi_print(menu);
 				break;
-			}
 		}
 	}
 }
@@ -132,7 +126,7 @@ void Client::recv_handler(Client* client)
 	while(!client->exited)
 	{
 		char message[client->MAX_LEN];
-		int bytes_received = recv(client->client_socket, message, sizeof(message), 0);
+		int bytes_received = recv(client->client_socket, message, client->MAX_LEN, 0);
 		if(bytes_received <= 0)
 			continue;
 		client->multi_print(message);

@@ -16,6 +16,7 @@ public:
     Group(string name, string description="");
     void has_premission(User* user);
     void add_member(User* new_member);
+    bool is_member(User* user);
 };
 
 

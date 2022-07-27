@@ -11,9 +11,15 @@ Tablefile::Tablefile(string cmnd)
         name=matches[1];
         addr="tables/"+name+".txt";
         string arguments=matches[2];
-        file.open(addr, ios::app);
         vector<string> temp;
         temp=mysplit(arguments, 1);
+
+        file.open(addr, ios::in);
+        string line;
+        getline(file, line);
+        file.close();
+
+        file.open(addr, ios::app);
         for(int i=0; i<temp.size(); i++)
         {
             if(i%2==0)
@@ -21,7 +27,8 @@ Tablefile::Tablefile(string cmnd)
             else
             {
                 args[temp[i-1]]=temp[i];
-                file<<temp[i-1]<<":"<<temp[i]<<" ";
+                if(!line.length())
+                    file<<temp[i-1]<<":"<<temp[i]<<" ";
             }
         }
         // file<<"\n";
@@ -34,12 +41,13 @@ void Tablefile::insert_record(string cmnd)
     lock_guard<mutex> guard(mtx);
     regex insertpat("INSERT INTO ([a-zA-Z0-9_]+) VALUES \\((.+)\\)");
     smatch matches;
+    file.open(addr, ios::app);
+    file.close();
 
     if(regex_search(cmnd, matches, insertpat))
     {
         string vals=matches[2];
         file.open(addr, ios::app);
-        // file.seekp(0,ios::end);
         file<<"\n";
         vector<string> temp=mysplit(vals, 0);
         for(int i=0; i<argnames.size()-1; i++)
@@ -51,6 +59,7 @@ void Tablefile::insert_record(string cmnd)
             else
                 file<<temp[i]<<",";
         }
+
         if(args[argnames[argnames.size()-1]]=="string")
                 file<<temp[argnames.size()-1].substr(1,temp[argnames.size()-1].length()-2);
             else if(args[argnames[argnames.size()-1]]=="timestamp")
@@ -66,10 +75,10 @@ void Tablefile::delete_record(string cmnd)
     lock_guard<mutex> guard(mtx);
     regex deletepat("^DELETE FROM ([a-zA-Z0-9_]+) WHERE (.+)$");
     smatch matches;
-    file.open(addr, ios::in);
-
+    
     if(regex_search(cmnd, matches, deletepat))
     {
+        file.open(addr, ios::in);
         string condition=matches[2];
         string line;
         fstream tempfile;
@@ -84,6 +93,7 @@ void Tablefile::delete_record(string cmnd)
         {
             if(check_condition(line, condition))
             {
+                cout<<line<<endl;
                 line.replace(line.find(line), line.length(), "");
             }
             if(line!="")
@@ -106,10 +116,10 @@ void Tablefile::update_record(string cmnd)
     lock_guard<mutex> guard(mtx);
     regex updatepat("^UPDATE ([a-zA-Z0-9_]+) SET (.+) WHERE (.+)$");
     smatch matches;
-    file.open(addr, ios::in);
-
+    
     if(regex_search(cmnd, matches, updatepat))
     {
+        file.open(addr, ios::in);
         string condition=matches[3];
         string updates=matches[2];
         vector<string> newvals=mysplit(updates, 0);
@@ -173,6 +183,7 @@ vector<string>* Tablefile::select_records(string cmnd)
     smatch matches;
     vector<string>* validrecords=new vector<string>();
     file.open(addr, ios::in);
+    
     if(regex_search(cmnd, matches, selectpat1))
     {
         string condition=matches[3];
@@ -197,7 +208,7 @@ vector<string>* Tablefile::select_records(string cmnd)
         }
         else
         {
-            vector<string> selectedtitles=mysplit(titles, 0);
+            vector<string> selectedtitles=mysplit(titles.substr(1,titles.length()-2), 0);
 
             vector<int> indexes;
             for(string title: selectedtitles)
@@ -256,7 +267,7 @@ vector<string>* Tablefile::select_records(string cmnd)
         }
         else
         {
-            vector<string> selectedtitles=mysplit(titles, 0);
+            vector<string> selectedtitles=mysplit(titles.substr(1,titles.length()-2), 0);
             vector<int> indexes;
             for(string title: selectedtitles)
                 for(int i=0; i<argnames.size(); i++)
@@ -288,6 +299,7 @@ vector<string>* Tablefile::select_records(string cmnd)
             }
         }
     }
+    file.close();
     return validrecords;
 }
 
@@ -367,7 +379,7 @@ bool Tablefile::check_condition(string line, string condition)
         vector<string> temp=mysplit(line, 0);
         return check_condition2(temp[index1], type1, oprtr1, value1) || check_condition2(temp[index2], type2, oprtr2, value2);
     }
-    else
+    else if(regex_search(condition, matches, pat3))
     {
         string arg1=matches[1], arg2=matches[4];
         string oprtr1=matches[2], oprtr2=matches[5];
@@ -375,7 +387,7 @@ bool Tablefile::check_condition(string line, string condition)
         string type1=args[arg1], type2=args[arg2];
         int index1, index2;
         for(int i=0; i<argnames.size(); i++)
-        {    
+        {
             if(argnames[i]==arg1)
                 index1=i;
             if(argnames[i]==arg2)
@@ -385,6 +397,7 @@ bool Tablefile::check_condition(string line, string condition)
         vector<string> temp=mysplit(line, 0);
         return check_condition2(temp[index1], type1, oprtr1, value1) && check_condition2(temp[index2], type2, oprtr2, value2);
     }
+    return false;
 
 
 }

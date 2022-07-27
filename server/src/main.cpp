@@ -1,5 +1,19 @@
 #include "../headers/Server.hpp"
 
+
+
+// int main()
+// {
+//     Tablefile tf("CREATE TABLE users (username string,password string,name string)");
+//     tf.insert_record("INSERT INTO users VALUES (\"Hamid\",\"5445\",\"hh\")");
+//     tf.insert_record("INSERT INTO users VALUES (\"darya\",\"444\",\"dd\")");
+//     tf.insert_record("INSERT INTO users VALUES (\"negar\",\"555\",\"nn\")");
+//     // tf.delete_record("DELETE FROM employee WHERE income>45000");
+//     // tf.update_record("UPDATE users SET leaveTime=\"15:00:00\" WHERE leaveTime==\"14:05:00\"");
+//     // vector<string> * recs=tf.select_records("SELECT (name) FROM employee WHERE income>45000");
+// }
+
+
 Server* server = 0;
 
 void exit_app(int sig_num);
@@ -13,15 +27,7 @@ int main()
     server->start_accepting();
     exit_app(0);
 
-    // Tablefile tf("CREATE TABLE employee (name string,leaveTime timestamp,income int)");
-    // tf.insert_record("INSERT INTO employee VALUES (\"Hamid\",\"17:05:00\",45000)");
-    // tf.insert_record("INSERT INTO employee VALUES (\"darya\",\"14:05:00\",200000)");
-    // tf.insert_record("INSERT INTO employee VALUES (\"negar\",\"15:05:00\",350000)");
-    // // tf.delete_record("DELETE FROM employee WHERE income>45000");
-    // tf.update_record("UPDATE employee SET leaveTime=\"15:00:00\" WHERE leaveTime==\"14:05:00\"");
-    // vector<string> * recs=tf.select_records("SELECT name FROM employee WHERE income>45000");
-    // for(int i=0; i<recs->size(); i++)
-    //     cout<<recs->at(i)<<endl;
+    
 }
 
 void exit_app(int sig_num)

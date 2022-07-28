@@ -93,7 +93,6 @@ void Tablefile::delete_record(string cmnd)
         {
             if(check_condition(line, condition))
             {
-                cout<<line<<endl;
                 line.replace(line.find(line), line.length(), "");
             }
             if(line!="")

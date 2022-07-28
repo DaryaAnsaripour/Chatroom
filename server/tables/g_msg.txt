@@ -1,1 +1,6 @@
 id:int group:string user:string time:timestamp msg:string 
+1,us,radi,16:41:15,hello
+2,us,daryaapr,16:41:25,hii
+3,us,daryaapr,16:42:32,hello
+4,us,daryaapr,16:43:13,hiiii
+5,us,daryaapr,16:43:55,chetoriiin

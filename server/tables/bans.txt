@@ -1,0 +1,1 @@
+banned:string group:string 

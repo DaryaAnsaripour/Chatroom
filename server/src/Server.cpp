@@ -11,6 +11,7 @@ Server::Server()
     do_command("CREATE TABLE users (username string,password string,name string)");
     do_command("CREATE TABLE blocks (blocker string,blocked string)");
     do_command("CREATE TABLE groups (name string,description string,usersNum int)");
+    do_command("CREATE TABLE bans (banned string,group string)");
     do_command("CREATE TABLE user_group (username string,group string)");
     do_command("CREATE TABLE pv_msg (id int,user1 string,user2 string,time timestamp,msg string)");
     do_command("CREATE TABLE g_msg (id int,group string,user string,time timestamp,msg string)");
@@ -140,7 +141,7 @@ bool Server::login_client(Userserver* user_server)
                 string welcome_message = "Server | welcome " + string(username);
                 send_message(user_server->client_socket, welcome_message);
                 multi_print(welcome_message);
-                do_for_user(users[username], "#menu");
+                do_for_user(users[username], "show menu");
                 send_buffer(users[username]);
                 return true;
             }
@@ -185,7 +186,7 @@ bool Server::login_client(Userserver* user_server)
                 string welcome_message = "Server | welcome " + string(username);
                 send_message(user_server->client_socket, welcome_message);
                 multi_print(welcome_message);
-                do_for_user(users[username], "#menu");
+                do_for_user(users[username], "show menu");
                 return true;
             }
         }
@@ -231,19 +232,26 @@ int Server::try_add_user(Userserver* user_server, string username, string passwo
 
 void Server::do_for_user(User* user, string message)
 {
-    regex changenamepat("change my name to ([^\\s]+)");
     regex creategppat("create group ([^\\s]+)");
     regex invitepat("invite ([^\\s]+) to ([^\\s]+)");
+    regex banuserpat("^ban ([^\\s]+) from ([^\\s]+)");
+    regex unbanuserpat("^unban ([^\\s]+) from ([^\\s]+)");
     regex blockuserpat("^block ([^\\s]+)");
     regex unblockuserpat("^unblock ([^\\s]+)");
-    regex pvpat("#pv #([^\\s]+) ([^#]+)");
-    regex gppat("#gp #([^\\s]+) ([^#]+)");
+    regex pvpat("pv ([^\\s]+) ([^#]+)");
+    regex gppat("gp ([^\\s]+) ([^#]+)");
+    regex pvhis("pv ([^\\s]+) #history");
+    regex gphis("gp ([^\\s]+) #history");
     smatch matches;
     try
     {
-        if(message=="#menu")
+        if(message=="show menu")
         {
-            send_message(user->user_server->client_socket, "1. change my name to\n2. show my groups\n3. show my friends\n4. show blocked\n5. exit");
+            send_message(user->user_server->client_socket, "1. change my name\n2. show my groups\n3. show my friends\n4. show blocked\n5. exit");
+        }
+        else if(message=="change my name")
+        {
+            change_name(user);
         }
         else if(message=="show my groups")
         {
@@ -256,12 +264,6 @@ void Server::do_for_user(User* user, string message)
         else if(message=="show blocked")
         {
             send_blocked(user);
-
-        }
-        else if(regex_search(message, matches, changenamepat))
-        {
-            string new_name=matches[1];
-            change_name(user, new_name);
         }
         else if(regex_search(message, matches, creategppat))
         {
@@ -273,6 +275,18 @@ void Server::do_for_user(User* user, string message)
             string new_member=matches[1];
             string groupname=matches[2];
             invite_group(user, new_member, groupname);
+        }
+        else if(regex_search(message, matches, banuserpat))
+        {
+            string banned=matches[1];
+            string groupname=matches[2];
+            ban_user(user, banned, groupname);
+        }
+        else if(regex_search(message, matches, unbanuserpat))
+        {
+            string unbanned=matches[1];
+            string groupname=matches[2];
+            unban_user(user, unbanned, groupname);
         }
         else if(regex_search(message, matches, blockuserpat))
         {
@@ -297,6 +311,16 @@ void Server::do_for_user(User* user, string message)
             string msg=matches[2];
             send_gp(user, groupname, msg);
         }
+        else if(regex_search(message, matches, pvhis))
+        {
+            string username=matches[1];
+            pv_history(user, username);
+        }
+        else if(regex_search(message, matches, gphis))
+        {
+            string groupname=matches[1];
+            gp_history(user, groupname);
+        }
         else
             throw "The command is not executable";
 
@@ -311,10 +335,16 @@ void Server::do_for_user(User* user, string message)
 
 
 
-void Server::change_name(User* user, string new_name)
+void Server::change_name(User* user)
 {
-    user->name=new_name;
-    do_command("UPDATE users SET name=\"" + new_name + "\" WHERE username==\"" + user->username +"\"");
+    char new_name[MAX_LEN];
+    send_message(user->user_server->client_socket, "Enter your new name :");\
+    int bytes_received = recv(user->user_server->client_socket, new_name, MAX_LEN, 0);
+    if(bytes_received <= 0)
+        return;
+
+    user->name=string(new_name);
+    do_command("UPDATE users SET name=\"" + string(new_name) + "\" WHERE username==\"" + user->username +"\"");
     send_message(user->user_server->client_socket, "Server | Your name changed succesfully!");
 }
 
@@ -412,7 +442,33 @@ void Server::invite_group(User* inviter, string new_member ,string groupname)
     do_command("UPDATE groups SET usersNum=" + to_string(groups[groupname]->users_num) + " WHERE name==\"" + groupname +"\"");
 
     send_message(inviter->user_server->client_socket, "Server | You invited " + users[new_member]->name);
-    broadcast_message("Server | " + inviter->name + " invited " + users[new_member]->name, inviter->username, groups[groupname]->users);
+    try
+    {
+        broadcast_message("Server | " + inviter->name + " invited " + users[new_member]->name, inviter->username, groups[groupname]->users);
+    }
+    catch(const char* err)
+    {}
+}
+
+void Server::ban_user(User* banner, string banned, string groupname)
+{
+    check_user(banned, false);
+    check_group(groupname);
+    groups[groupname]->ban_user(banner, users[banned]);
+    do_command("INSERT INTO bans VALUES (\"" + banned + "\",\"" + groupname + "\")" );
+
+    send_message(banner->user_server->client_socket, "Server | You banned " + banned + " from " + groupname);
+
+}
+
+void Server::unban_user(User* unbanner, string unbanned, string groupname)
+{
+    check_user(unbanned, false);
+    check_group(groupname);
+    groups[groupname]->unban_user(unbanner, users[unbanned]);
+    do_command("DELETE FROM bans WHERE banned==\"" + unbanned + "\" & group==\"" + groupname + "\"");
+
+    send_message(unbanner->user_server->client_socket, "Server | You unbanned " + unbanned + " from " + groupname);
 }
 
 void Server::block_user(User* blocker, string blocked)
@@ -431,7 +487,8 @@ void Server::unblock_user(User* unblocker, string unblocked)
     check_user(unblocked, false);
     if(unblocker->blocks.find(unblocked) ==  unblocker->blocks.end())
         throw "This user isn't blocked.";
-    unblocker->blocks[unblocked]=users[unblocked];
+    
+    unblocker->blocks.erase(unblocked);
     do_command("DELETE FROM blocks WHERE blocker==\"" + unblocker->username + "\" & blocked==\"" + unblocked + "\")" );
 
     send_message(unblocker->user_server->client_socket, "Server | You unblocked " + users[unblocked]->name);
@@ -448,7 +505,6 @@ void Server::send_pv(User* sender, User* receiver, string message)
         string msg="PV | " + sender->name+ " : " + message + " (" + time + ")";
         do_command("INSERT INTO pv_msg VALUES (" + to_string(pv_id) + ",\"" + sender->username + "\",\"" + receiver->username + "\",\"" + time + "\",\"" + message + "\")");
         send_message(receiver->user_server->client_socket, msg);
-        // send_message(sender->user_server->client_socket, "Server | You To " + receiver->name+ " : " + message + " (" + time + ")");
     }
     catch(const char* err)
     {
@@ -457,8 +513,10 @@ void Server::send_pv(User* sender, User* receiver, string message)
             pv_id++;
             do_command("INSERT INTO buffer VALUES (" + to_string(pv_id) + ",0)");
             do_command("INSERT INTO pv_msg VALUES (" + to_string(pv_id) + ",\"" + sender->username + "\",\"" + receiver->username + "\",\"" + time + "\",\"" + message + "\")");
-            
-            // send_message(sender->user_server->client_socket, "Server | You To " + receiver->name+ " : " + message + " (" + time + ")");
+        }
+        else
+        {
+            throw err;
         }
     }
 }
@@ -466,11 +524,65 @@ void Server::send_pv(User* sender, User* receiver, string message)
 void Server::send_gp(User* sender, string groupname, string message)
 {
     check_group(groupname);
+    groups[groupname]->has_premission(sender);
     gp_id++;
     string time=curr_time();
     string msg="GROUP " + groupname + " | " + sender->name + " : " + message + " (" + time + ")";
     do_command("INSERT INTO g_msg VALUES (" + to_string(gp_id) + ",\"" + groupname + "\",\"" + sender->username + "\",\"" + time + "\",\"" + message + "\")");
-    broadcast_message(msg, sender->username, groups[groupname]->users);
+    try
+    {
+        broadcast_message(msg, sender->username, groups[groupname]->users);
+    }
+    catch(const char* err)
+    {
+        if(string(err)=="This user isn't connected.")
+            do_command("INSERT INTO buffer VALUES (" + to_string(gp_id) + ",1)");
+    } 
+}
+
+void Server::pv_history(User* user, string username)
+{
+    check_user(username, false);
+    vector<string>* history1=new vector<string>();
+    history1=do_command("SELECT * FROM pv_msg WHERE user1==\"" + user->username +"\" & user2==\"" + username + "\"");
+
+    vector<string>* history2=new vector<string>();
+    history2=do_command("SELECT * FROM pv_msg WHERE user2==\"" + user->username +"\" & user1==\"" + username + "\"");
+
+    vector<string>* history=new vector<string>();
+    history=sort_by_time(history1, history2);
+    for(string &rec: *history)
+    {
+        vector<string> tmp=mysplit(rec, 0);
+        string msg;
+        if(tmp[1]==user->username)
+            msg="PV | You : " + tmp[4] + " (" + tmp[3] + ")";
+        else
+            msg="PV | " + tmp[1] + " : " + tmp[4] + " (" + tmp[3] + ")";
+        send_message(user->user_server->client_socket, msg);
+    }
+    if(!history->size())
+        send_message(user->user_server->client_socket, "You have no chat with " + username);
+
+}
+
+void Server::gp_history(User* user, string groupname)
+{
+    check_group(groupname);
+    vector<string>* history=new vector<string>();
+    history=do_command("SELECT * FROM g_msg WHERE group==\"" + groupname + "\"");
+    for(string &rec: *history)
+    {
+        vector<string> tmp=mysplit(rec, 0);
+        string msg;
+        if(tmp[2]==user->username)
+            msg="GROUP " + groupname + " | You : " + tmp[4] + " (" + tmp[3] + ")";
+        else
+            msg="GROUP " + groupname + " | " + tmp[1] + " : " + tmp[4] + " (" + tmp[3] + ")";
+        send_message(user->user_server->client_socket, msg);
+    }
+    if(!history->size())
+        send_message(user->user_server->client_socket, "There is no chat in " + groupname);
 }
 
 void Server::send_buffer(User* user)
@@ -574,6 +686,33 @@ void Server::get_users_from_db()
     {
         vector<string> user=mysplit(record, 0);
         users[user[0]]=new User(user[0], user[1], user[2]);
+
+        vector<string>* blocks=new vector<string>();
+        blocks=do_command("SELECT (blocked) FROM blocks WHERE blocker==\"" + user[0] + "\"");
+        for(string &blocked: *blocks)
+            users[user[0]]->blocks[blocked]=users[blocked];
+    }
+}
+
+void Server::get_groups_from_db()
+{
+    vector<string>* records=new vector<string>();
+    records=do_command("SELECT * FROM groups");
+    for(string &record: *records)
+    {
+        vector<string> group=mysplit(record, 0);
+        groups[group[0]]=new Group(group[0], group[1], stoi(group[2]));
+        
+        vector<string>* members=new vector<string>();
+        members=do_command("SELECT (username) FROM user_group WHERE group==\"" + group[0] + "\"");
+        groups[group[0]]->admin=users[members->at(0)];
+        for(string &member: *members)
+            groups[group[0]]->users[member]=users[member];
+
+        vector<string>* bans=new vector<string>();
+        bans=do_command("SELECT (banned) FROM bans WHERE group==\"" + group[0] + "\"");
+        for(string &banned: *bans)
+            groups[group[0]]->banned_users[banned]=users[banned];
     }
 }
 
@@ -595,10 +734,8 @@ void Server::broadcast_message(string message, string sender_username, map<strin
         if((user.first != sender_username) && (user.second->user_server))
             send_message(user.second->user_server->client_socket, message);
         else if((user.first != sender_username) && (!user.second->user_server))
-        {
-            do_command("INSERT INTO buffer VALUES (" + to_string(gp_id) + ",1)");
-        }
-
+            throw "This user isn't connected.";
+        
         // ATTENTION case !user.second->user_server must be handled by writing in buffer
     }
 
@@ -623,15 +760,11 @@ void Server::check_group(string groupname)
 
 void Server::check_blocked(User* sender, User* receiver)
 {
-    vector<string>* records1=new vector<string>();
-    records1=do_command("SELECT * FROM blocks WHERE blocker==\"" + sender->username + "\" & blocked==\"" + receiver->username + "\"");
-    if(!records1->empty())
-        throw "You have blocked " + receiver->username + ".";
-
-    vector<string>* records2=new vector<string>();
-    records2=do_command("SELECT * FROM blocks WHERE blocked==\"" + sender->username + "\" & blocker==\"" + receiver->username + "\"");
-    if(!records2->empty())
-        throw receiver->username + " has blocked you.";
+    if(sender->blocks.find(receiver->username)!=sender->blocks.end())
+        throw "You have blocked this user.";
+    
+    else if(receiver->blocks.find(sender->username)!=receiver->blocks.end())
+        throw "This user has blocked you.";
 }
 
 string Server::curr_time()
@@ -644,6 +777,36 @@ string Server::curr_time()
 	curr_tm = localtime(&curr_time);
     strftime(time_string, 50, "%T", curr_tm);
     return time_string;
+}
+
+vector<string>* Server::sort_by_time(vector<string>* v1, vector<string>* v2)
+{
+    vector<string>* v=new vector<string>();
+    v->resize(v1->size()+v2->size());
+    int i=0, j=0, k=0;
+
+    while(i<v1->size() && j<v2->size())
+    {
+        string s1=v1->at(i);
+        string s2=v2->at(j);
+        
+        vector<string> tmp1=mysplit(s1, 0);
+        vector<string> tmp2=mysplit(s2, 0);
+
+        timestamp t1(tmp1[3]);
+        timestamp t2(tmp2[3]);
+
+        if(t1<t2)
+            v->at(k++)=v1->at(i++);
+        else
+            v->at(k++)=v2->at(j++);
+    }
+    while(i<v1->size())
+        v->at(k++)=v1->at(i++);
+    while(j<v2->size())
+        v->at(k++)=v2->at(j++);
+
+    return v;
 }
 
 
@@ -670,6 +833,15 @@ void Server::delete_users()
     users.clear();
 }
 
+void Server::delete_groups()
+{
+    for (auto & u : groups)
+    {
+        delete u.second;
+    }
+    groups.clear();
+}
+
 void Server::close_connection()
 {
     close(server_socket);
@@ -684,5 +856,6 @@ Server::~Server()
     delete database["g_msg"];
     delete database["buffer"];
     delete_users();
+    delete_groups();
     close_connection();
 }

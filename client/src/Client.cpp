@@ -110,7 +110,7 @@ void Client::send_handler(Client* client)
 		char str[client->MAX_LEN];
 		cin.getline(str,client->MAX_LEN);
 
-		if (string(str) == "#exit")
+		if (string(str) == "exit")
 		{
 			client->exited = true;
 			client->recv_thread->detach();

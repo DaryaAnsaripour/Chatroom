@@ -62,10 +62,6 @@ Console.hpp
 ../headers/Console.hpp
 /home/darya/Documents/AP/Chatroom/server/headers/Console.hpp
 
-/home/darya/Documents/AP/Chatroom/server/src/Group.cpp
-../headers/Group.hpp
-/home/darya/Documents/AP/Chatroom/server/headers/Group.hpp
-
 /home/darya/Documents/AP/Chatroom/server/src/Server.cpp
 ../headers/Server.hpp
 /home/darya/Documents/AP/Chatroom/server/headers/Server.hpp

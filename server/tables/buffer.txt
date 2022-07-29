@@ -1,1 +1,1 @@
-id:int is_group:int 
+id:int is_group:int

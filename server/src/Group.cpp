@@ -23,6 +23,22 @@ void Group::add_member(User* user)
     throw "This user is already a member of group.";
 }
 
+void Group::remove_member(User* remover, User* member)
+{
+    if(remover->username!=admin->username)
+        throw "Only admin can remove users.";
+    if(users.find(member->username)==users.end())
+        throw "This user is not a member of this group.";
+    users.erase(member->username);
+}
+
+void Group::left(User* member)
+{
+    if(users.find(member->username)==users.end())
+        throw "You are not a member of this group.";
+    users.erase(member->username);
+}
+
 void Group::ban_user(User* banner, User* banned)
 {
     if(banner->username!=admin->username)

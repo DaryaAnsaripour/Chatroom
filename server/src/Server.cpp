@@ -234,6 +234,8 @@ void Server::do_for_user(User* user, string message)
 {
     regex creategppat("create group ([^\\s]+)");
     regex invitepat("invite ([^\\s]+) to ([^\\s]+)");
+    regex removepat("remove ([^\\s]+) from ([^\\s]+)");
+    regex leftpat("left from ([^\\s]+)");
     regex banuserpat("^ban ([^\\s]+) from ([^\\s]+)");
     regex unbanuserpat("^unban ([^\\s]+) from ([^\\s]+)");
     regex blockuserpat("^block ([^\\s]+)");
@@ -275,6 +277,19 @@ void Server::do_for_user(User* user, string message)
             string new_member=matches[1];
             string groupname=matches[2];
             invite_group(user, new_member, groupname);
+        }
+        else if(regex_search(message, matches, removepat))
+        {
+            string member=matches[1];
+            string groupname=matches[2];
+            remove_user(user, member, groupname);
+            
+        }
+        else if(regex_search(message, matches, leftpat))
+        {
+            string groupname=matches[1];
+            left(user, groupname);
+            
         }
         else if(regex_search(message, matches, banuserpat))
         {
@@ -450,6 +465,46 @@ void Server::invite_group(User* inviter, string new_member ,string groupname)
     {}
 }
 
+void Server::remove_user(User* remover, string member, string groupname)
+{
+    check_group(groupname);
+    check_user(member, false);
+    groups[groupname]->remove_member(remover, users[member]);
+    groups[groupname]->users_num--;
+    do_command("DELETE FROM user_group WHERE username==\"" + member + "\" & group==\"" + groupname + "\"");
+    do_command("UPDATE groups SET usersNum=" + to_string(groups[groupname]->users_num) + " WHERE name==\"" + groupname +"\"");
+
+    send_message(remover->user_server->client_socket, "Server | You removed " + users[member]->name);
+    try
+    {
+        broadcast_message("Server | " + remover->name + " removed " + users[member]->name, remover->username, groups[groupname]->users);
+    }
+    catch(const char* err)
+    {}
+
+}
+
+void Server::left(User* member, string groupname)
+{
+    check_group(groupname);
+    groups[groupname]->left(member);
+    groups[groupname]->users_num--;
+    do_command("DELETE FROM user_group WHERE username==\"" + member->username + "\" & group==\"" + groupname + "\"");
+    do_command("UPDATE groups SET usersNum=" + to_string(groups[groupname]->users_num) + " WHERE name==\"" + groupname +"\"");
+
+    send_message(member->user_server->client_socket, "Server | You left from " + groupname);
+    try
+    {
+        broadcast_message("Server | " + member->name + " left the group." , member->username, groups[groupname]->users);
+    }
+    catch(const char* err)
+    {}
+
+
+
+
+}
+
 void Server::ban_user(User* banner, string banned, string groupname)
 {
     check_user(banned, false);
@@ -489,7 +544,7 @@ void Server::unblock_user(User* unblocker, string unblocked)
         throw "This user isn't blocked.";
     
     unblocker->blocks.erase(unblocked);
-    do_command("DELETE FROM blocks WHERE blocker==\"" + unblocker->username + "\" & blocked==\"" + unblocked + "\")" );
+    do_command("DELETE FROM blocks WHERE blocker==\"" + unblocker->username + "\" & blocked==\"" + unblocked + "\"" );
 
     send_message(unblocker->user_server->client_socket, "Server | You unblocked " + users[unblocked]->name);
 }
@@ -502,17 +557,21 @@ void Server::send_pv(User* sender, User* receiver, string message)
         check_blocked(sender, receiver);
         check_user(receiver->username);
         pv_id++;
-        string msg="PV | " + sender->name+ " : " + message + " (" + time + ")";
+        string msg1="PV | " + sender->name+ " : " + message + " (" + time + ")";
+        string msg2="PV | You : " + message + " (" + time + ")";
         do_command("INSERT INTO pv_msg VALUES (" + to_string(pv_id) + ",\"" + sender->username + "\",\"" + receiver->username + "\",\"" + time + "\",\"" + message + "\")");
-        send_message(receiver->user_server->client_socket, msg);
+        send_message(receiver->user_server->client_socket, msg1);
+        send_message(sender->user_server->client_socket, msg2);
     }
     catch(const char* err)
     {
         if(string(err)=="This user isn't connected.")
         {
             pv_id++;
+            string msg2="PV | You : " + message + " (" + time + ")";
             do_command("INSERT INTO buffer VALUES (" + to_string(pv_id) + ",0)");
             do_command("INSERT INTO pv_msg VALUES (" + to_string(pv_id) + ",\"" + sender->username + "\",\"" + receiver->username + "\",\"" + time + "\",\"" + message + "\")");
+            send_message(sender->user_server->client_socket, msg2);
         }
         else
         {
@@ -527,11 +586,13 @@ void Server::send_gp(User* sender, string groupname, string message)
     groups[groupname]->has_premission(sender);
     gp_id++;
     string time=curr_time();
-    string msg="GROUP " + groupname + " | " + sender->name + " : " + message + " (" + time + ")";
+    string msg1="GROUP " + groupname + " | " + sender->name + " : " + message + " (" + time + ")";
+    string msg2="GROUP " + groupname + " | You : " + message + " (" + time + ")";
     do_command("INSERT INTO g_msg VALUES (" + to_string(gp_id) + ",\"" + groupname + "\",\"" + sender->username + "\",\"" + time + "\",\"" + message + "\")");
+    send_message(sender->user_server->client_socket, msg2);
     try
     {
-        broadcast_message(msg, sender->username, groups[groupname]->users);
+        broadcast_message(msg1, sender->username, groups[groupname]->users);
     }
     catch(const char* err)
     {
@@ -578,7 +639,7 @@ void Server::gp_history(User* user, string groupname)
         if(tmp[2]==user->username)
             msg="GROUP " + groupname + " | You : " + tmp[4] + " (" + tmp[3] + ")";
         else
-            msg="GROUP " + groupname + " | " + tmp[1] + " : " + tmp[4] + " (" + tmp[3] + ")";
+            msg="GROUP " + groupname + " | " + tmp[2] + " : " + tmp[4] + " (" + tmp[3] + ")";
         send_message(user->user_server->client_socket, msg);
     }
     if(!history->size())

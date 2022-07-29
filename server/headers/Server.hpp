@@ -38,9 +38,10 @@ public:
     void send_blocked(User* user);
     void create_group(User* user, string groupname);
     void invite_group(User* inviter, string new_member ,string groupname);
+    void remove_user(User* remover, string member, string groupname);
+    void left(User* member, string groupname);
     void ban_user(User* banner, string banned, string groupname);
     void unban_user(User* banner, string banned, string groupname);
-
     void block_user(User* blocker, string blocked);
     void unblock_user(User* unblocker, string unblocked);
     void send_pv(User* sender, User* receiver, string message);
